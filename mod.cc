@@ -14,23 +14,51 @@ void pdnoteon(int ch, int pitch, int vel) {
   printf("noteon: %d %d %d\n", ch, pitch, vel);
 }
 
+static void start_message() {
+  libpd_start_message();
+}
+static void finish_message( const Arguments& args ) {
+  String::AsciiValue receiver( args[0]->ToString() );
+  String::AsciiValue message( args[0]->ToString() );
+  libpd_finish_message( *receiver, *message);
+}
+static void add_float( const Arguments& args ) {
+	float val = ( float )args[0]->NumberValue();
+	libpd_add_float( val );
+}
+
+static void process_float( const Arguments& args ) {
+	float inbuf[64];
+	float outbuf[128];
+    libpd_process_float(inbuf, outbuf);
+}
+static Handle<Value> openfile( const Arguments& args ) {
+	String::AsciiValue filename( args[0]->ToString() );
+	libpd_openfile( *filename, "." );
+}
+
+/**
+* note that setup is not part of the libpd api, just 
+* here for testing convenience for now.
+*/
+static Handle<Value> setup( const Arguments& args ) {
+	int srate = 44100;
+	libpd_printhook = (t_libpd_printhook) pdprint;
+	libpd_noteonhook = (t_libpd_noteonhook) pdnoteon;
+	libpd_init();
+	libpd_init_audio(1, 2, srate, 1);
+}
+
 static Handle<Value> foo(const Arguments& args)
 {
   int srate = 44100;
-  libpd_printhook = (t_libpd_printhook) pdprint;
-  libpd_noteonhook = (t_libpd_noteonhook) pdnoteon;
-  libpd_init();
-  libpd_init_audio(1, 2, srate, 1);
   float inbuf[64], outbuf[128];  // one input channel, two output channels
                                  // block size 64, one tick per buffer
 
   // compute audio    [; pd dsp 1(
-  libpd_start_message();
-  libpd_add_float(1.0f);
-  libpd_finish_message("pd", "dsp");
-
-  // open patch       [; pd open file folder(
-  libpd_openfile("test.pd", ".");
+  // libpd_start_message();
+  // libpd_add_float(1.0f);
+  // libpd_finish_message("pd", "dsp");
 
   // now run pd for ten seconds (logical time)
   int i;
@@ -46,6 +74,8 @@ extern "C" {
   static void init(Handle<Object> target)
   {
     NODE_SET_METHOD(target, "foo", foo);
+    NODE_SET_METHOD(target, "setup", setup);
+    NODE_SET_METHOD(target, "openfile", openfile);
   }
  
   NODE_MODULE(libpd, init);
