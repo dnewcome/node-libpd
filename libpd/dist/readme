@@ -1,0 +1,7 @@
+This is the compiled libpd library, built from sources on 64bit ubuntu.
+
+The header files are plucked from libpd_wrapper and pure-data directories
+in the source code. This should be all that is needed to compile against
+libpd.
+
+-dan
