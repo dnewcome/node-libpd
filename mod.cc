@@ -27,7 +27,7 @@ static void add_float( const Arguments& args ) {
 	libpd_add_float( val );
 }
 
-static void process_float( const Arguments& args ) {
+static Handle<Value> process_float( const Arguments& args ) {
 	float inbuf[64];
 	float outbuf[128];
     libpd_process_float(inbuf, outbuf);
@@ -49,16 +49,11 @@ static Handle<Value> setup( const Arguments& args ) {
 	libpd_init_audio(1, 2, srate, 1);
 }
 
-static Handle<Value> foo(const Arguments& args)
+static Handle<Value> run(const Arguments& args)
 {
   int srate = 44100;
   float inbuf[64], outbuf[128];  // one input channel, two output channels
                                  // block size 64, one tick per buffer
-
-  // compute audio    [; pd dsp 1(
-  // libpd_start_message();
-  // libpd_add_float(1.0f);
-  // libpd_finish_message("pd", "dsp");
 
   // now run pd for ten seconds (logical time)
   int i;
@@ -73,9 +68,10 @@ static Handle<Value> foo(const Arguments& args)
 extern "C" {
   static void init(Handle<Object> target)
   {
-    NODE_SET_METHOD(target, "foo", foo);
+    NODE_SET_METHOD(target, "run", run);
     NODE_SET_METHOD(target, "setup", setup);
     NODE_SET_METHOD(target, "openfile", openfile);
+    NODE_SET_METHOD(target, "process_float", process_float);
   }
  
   NODE_MODULE(libpd, init);
