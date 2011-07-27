@@ -1,3 +1,3 @@
-var hello = require('./cpphello.node');
+var hello = require('./libpd.node');
 console.log(hello.foo());
 

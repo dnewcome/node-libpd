@@ -48,5 +48,5 @@ extern "C" {
     NODE_SET_METHOD(target, "foo", foo);
   }
  
-  NODE_MODULE(cpphello, init);
+  NODE_MODULE(libpd, init);
 }
