@@ -1,0 +1,23 @@
+In progress:
+
+callbacks for libpd hooks
+There are is a print callback and 5 atom event callbacks defined in libpd and
+a further 7 midi-related callbacks. We should impelment all of these
+as EventEmitters.
+use
+grep -r hook .
+to find them in the libpd headers.
+
+TODO:
+
+get passing JS arrays as audio buffers working
+
+Future:
+
+spawn process to isolate libpd. 
+The design of libpd is such that
+it can only have one global instance per process. This presents an
+odd interface to JS. Ideally we'd like to return an encapsulated
+environment that points to a single instance of the pd env.
+In order to do this we need to spawn as a separate proc though.
+
