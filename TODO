@@ -21,3 +21,9 @@ odd interface to JS. Ideally we'd like to return an encapsulated
 environment that points to a single instance of the pd env.
 In order to do this we need to spawn as a separate proc though.
 
+MacOS porting
+
+The code is building under 10.8 using xcode commandline tools (gcc)
+Segfault when opening file, caused by something in V8 args not
+libpd it seems.
+

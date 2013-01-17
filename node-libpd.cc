@@ -6,8 +6,14 @@
 using namespace node;
 using namespace v8;
  
+Handle<Function> printhook_callback;
+Handle<Object> printhook_callback_receiver;
+
 void pdprint(const char *s) {
-  printf("%s", s);
+  // printf("%s", s);
+	Handle<Value> msg = String::New(s);
+	Handle<Value> arr[] = { msg };
+	printhook_callback->Call( printhook_callback_receiver, 1, &msg );
 }
 
 void pdnoteon(int ch, int pitch, int vel) {
@@ -17,11 +23,13 @@ void pdnoteon(int ch, int pitch, int vel) {
 static void start_message() {
   libpd_start_message();
 }
+
 static void finish_message( const Arguments& args ) {
   String::AsciiValue receiver( args[0]->ToString() );
   String::AsciiValue message( args[0]->ToString() );
   libpd_finish_message( *receiver, *message);
 }
+
 static void add_float( const Arguments& args ) {
 	float val = ( float )args[0]->NumberValue();
 	libpd_add_float( val );
@@ -32,9 +40,23 @@ static Handle<Value> process_float( const Arguments& args ) {
 	float outbuf[128];
     libpd_process_float(inbuf, outbuf);
 }
+
 static Handle<Value> openfile( const Arguments& args ) {
+	// segfault 11 here under macos. Not sure if it is
+	// the cast or arg[0] is missing
 	String::AsciiValue filename( args[0]->ToString() );
 	libpd_openfile( *filename, "." );
+}
+
+
+/**
+* TODO: probably want to use EventEmitter for these
+* callbacks eventually.
+*/
+static Handle<Value> add_printhook_listener( const Arguments& args ) {
+	printf("adding listener");
+	printhook_callback = Handle<Function>::Cast( args[0] );
+	printhook_callback_receiver = args.This();
 }
 
 /**
@@ -66,11 +88,12 @@ static Handle<Value> run(const Arguments& args)
 }
  
 extern "C" {
-  static void init(Handle<Object> target)
+  void init(Handle<Object> target)
   {
     NODE_SET_METHOD(target, "run", run);
     NODE_SET_METHOD(target, "setup", setup);
     NODE_SET_METHOD(target, "openfile", openfile);
+    NODE_SET_METHOD(target, "add_printhook_listener", add_printhook_listener );
     NODE_SET_METHOD(target, "process_float", process_float);
   }
  
