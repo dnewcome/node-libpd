@@ -10,10 +10,10 @@ Handle<Function> printhook_callback;
 Handle<Object> printhook_callback_receiver;
 
 void pdprint(const char *s) {
-  // printf("%s", s);
+	printf("%s\n", s);
 	Handle<Value> msg = String::New(s);
 	Handle<Value> arr[] = { msg };
-	printhook_callback->Call( printhook_callback_receiver, 1, &msg );
+	// printhook_callback->Call( printhook_callback_receiver, 1, &msg );
 }
 
 void pdnoteon(int ch, int pitch, int vel) {
@@ -45,6 +45,7 @@ static Handle<Value> openfile( const Arguments& args ) {
 	// segfault 11 here under macos. Not sure if it is
 	// the cast or arg[0] is missing
 	String::AsciiValue filename( args[0]->ToString() );
+	printf( "opening pd patch: %s\n", *filename );
 	libpd_openfile( *filename, "." );
 }
 
